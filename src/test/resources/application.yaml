@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: register-lecture
+  profiles:
+    active: test
+
+  datasource:
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    url: jdbc:tc:mysql:8.3:///test_container_db  # jdbc:tc:<도커이미지>://[host]/<database name> # host는 생략이 가능하며 생략 시 포트 번호는 랜덤하게 잡힘
+    username: root
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        default_batch_fetch_size: 100
+    open-in-view: false

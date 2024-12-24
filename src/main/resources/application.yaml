@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: register-lecture
+  datasource:
+    url: jdbc:mysql://localhost:33060/lecture
+    username: user
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        default_batch_fetch_size: 100
+    open-in-view: false  # 영속성 컨텍스트의 생명주기를 트랜잭션 범위로 한정(트랜잭션 범위 내에서만 영속성 컨텍스트가 열림). 실시간 트래픽이 많은 서비스에서는 false로 설정하는 것이 좋음

@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  postgres:
+    container_name: lecture-service-db
+    image: mysql:8.3
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpw}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-lecture}
+      - MYSQL_USER=${MYSQL_USER:-user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --log-error-verbosity=1
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --innodb_lock_wait_timeout=1
+    ports:
+      - "33060:3306"
+    restart: always
+    volumes:
+      - ./db/mysql/data:/var/lib/mysql
+#      - ./db/mysql/init:/docker-entrypoint-initdb.
