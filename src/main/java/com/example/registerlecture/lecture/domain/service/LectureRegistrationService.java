@@ -14,22 +14,27 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class LectureService {
+public class LectureRegistrationService {
     private final LectureRepo lectureRepo;
     private final LectureRegistrationRepo lectureRegistrationRepo;
 
     @Transactional
     public LectureRegistrationResult registerLecture(User user, long lectureId) {
         Lecture lecture = lectureRepo.getById(lectureId);
-        if (lecture.isFull()) {
-            throw new CapacityExceededException();
-        }
-
-        if (lectureRegistrationRepo.existsByUserIdAndLectureId(user.getId(), lectureId)) {
-            throw new AlreadyRegisteredException();
-        }
+        validateLectureRegistration(user, lecture);
 
         LectureRegistration registration = lectureRegistrationRepo.save(user, lecture);
         return LectureRegistrationResult.from(lecture, registration);
     }
+
+    private void validateLectureRegistration(User user, Lecture lecture) {
+        if (lecture.isFull()) {
+            throw new CapacityExceededException();
+        }
+
+        if (lectureRegistrationRepo.existsByUserIdAndLectureId(user.getId(), lecture.getId())) {
+            throw new AlreadyRegisteredException();
+        }
+    }
+
 }

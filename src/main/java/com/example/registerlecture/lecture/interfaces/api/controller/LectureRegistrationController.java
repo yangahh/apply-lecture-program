@@ -9,19 +9,22 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/lectures")
+@RequestMapping("/lectures/{id}/registrations")
 @RequiredArgsConstructor
-public class LectureController {
+@Validated
+public class LectureRegistrationController {
     private final LectureRegistrationFacade lectureRegistrationFacade;
 
-    @PostMapping("/{id}/registrations")
-    public ApiResponse<LectureRegistrationResponse> registerLecture(
+    @PostMapping
+    public ResponseEntity<ApiResponse<LectureRegistrationResponse>> registerLecture(
             @PathVariable("id") @NotNull @Positive(message = "잘못된 형식의 ID 입니다.") long id,
             @RequestBody @Valid LectureRegistrationRequest request) {
         LectureRegistrationResult result = lectureRegistrationFacade.registerLecture(request.getUserId(), id);
-        return ApiResponse.ok(LectureRegistrationResponse.from(result));
+        return ResponseEntity.ok(ApiResponse.ok(LectureRegistrationResponse.from(result)));
     }
 }
