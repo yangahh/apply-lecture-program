@@ -13,18 +13,29 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/lectures/{id}/registrations")
+@RequestMapping("/lectures")
 @RequiredArgsConstructor
 @Validated
 public class LectureRegistrationController {
     private final LectureRegistrationFacade lectureRegistrationFacade;
 
-    @PostMapping
+    @PostMapping("/{id}/registrations")
     public ResponseEntity<ApiResponse<LectureRegistrationResponse>> registerLecture(
             @PathVariable("id") @NotNull @Positive(message = "잘못된 형식의 ID 입니다.") long id,
             @RequestBody @Valid LectureRegistrationRequest request) {
         LectureRegistrationResult result = lectureRegistrationFacade.registerLecture(request.getUserId(), id);
         return ResponseEntity.ok(ApiResponse.ok(LectureRegistrationResponse.from(result)));
+    }
+
+    @GetMapping("/registrations")
+    public ResponseEntity<ApiResponse<List<LectureRegistrationResponse>>> getUserRegisteredLectures(
+            @RequestParam(value = "userId", required = true) @Positive(message = "잘못된 형식의 ID 입니다.") long userId) {
+        List<LectureRegistrationResponse> result = lectureRegistrationFacade.getRegisteredLecturesByUser(userId).stream()
+                .map(LectureRegistrationResponse::from)
+                .toList();
+        return ResponseEntity.ok(ApiResponse.ok(result));
     }
 }

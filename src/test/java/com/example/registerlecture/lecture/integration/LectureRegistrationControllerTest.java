@@ -26,7 +26,6 @@ class LectureRegistrationControllerTest {
     @MockitoBean
     LectureRegistrationFacade lectureRegistrationFacade;
 
-    String uri = "/lectures/{id}/registrations";
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -35,6 +34,7 @@ class LectureRegistrationControllerTest {
     @Test
     void shouldFailWhenIdIsInvalid() throws Exception {
         // given
+        String uri = "/lectures/{id}/registrations";
         long lectureId = -1L;
         LectureRegistrationRequest request = new LectureRegistrationRequest(1L);
 
@@ -51,6 +51,7 @@ class LectureRegistrationControllerTest {
     @Test
     void shouldFailWhenUserIdIsNull() throws Exception {
         // given
+        String uri = "/lectures/{id}/registrations";
         long lectureId = 1L;
         LectureRegistrationRequest request = new LectureRegistrationRequest();
 
@@ -64,8 +65,9 @@ class LectureRegistrationControllerTest {
 
     @DisplayName("특강 신청에 성공한다.")
     @Test
-    void shouldSuccessWhenregisterLecture() throws Exception {
+    void shouldSuccessWhenRegisterLecture() throws Exception {
         // given
+        String uri = "/lectures/{id}/registrations";
         long lectureId = 1L;
         long userId = 1L;
         LectureRegistrationRequest request = new LectureRegistrationRequest(userId);
@@ -80,5 +82,32 @@ class LectureRegistrationControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
+    }
+
+    @DisplayName("userId 파라미터 없이 특강 신청 목록을 조회할 경우 실패한다.")
+    @Test
+    void shouldFailWhenWithoutUserId() throws Exception {
+        // given
+        String uri = "/lectures/registrations";
+
+        // when // then
+        mockMvc.perform(MockMvcRequestBuilders.get(uri)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @DisplayName("특정 사용자가 신청한 특강 목록을 정상적으로 조회한다.")
+    @Test
+    void shouldSuccessWhenGetLectureRegistration() throws Exception {
+        // give
+        String uri = "/lectures/registrations";
+
+        // when // then
+        mockMvc.perform(MockMvcRequestBuilders.get(uri)
+                        .param("userId", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 }

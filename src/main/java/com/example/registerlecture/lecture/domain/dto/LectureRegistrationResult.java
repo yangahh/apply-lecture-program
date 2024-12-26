@@ -14,7 +14,8 @@ public record LectureRegistrationResult(
         LocalDateTime lectureDateTime,
         LocalDateTime registeredAt
 ) {
-    public static LectureRegistrationResult from(Lecture lecture, LectureRegistration lectureRegistration) {
+    public static LectureRegistrationResult from(LectureRegistration lectureRegistration) {
+        Lecture lecture = lectureRegistration.getLecture();
         return new LectureRegistrationResult(
                 lectureRegistration.getUser().getId(),
                 lecture.getId(),

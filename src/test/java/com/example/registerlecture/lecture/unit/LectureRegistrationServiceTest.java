@@ -17,11 +17,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class LectureRegistrationServiceTest {
@@ -92,8 +95,6 @@ class LectureRegistrationServiceTest {
                 .user(mockUser)
                 .lecture(mockLecture)
                 .build();
-
-        // 리플렉션을 사용해 ID 설정
         ReflectionTestUtils.setField(expected, "id", 1L);
 
         given(lectureRepo.getById(lectureId)).willReturn(mockLecture);
@@ -106,6 +107,83 @@ class LectureRegistrationServiceTest {
         // then
         then(lectureRegistrationRepo).should().save(mockUser, mockLecture);
         assertThat(result.lectureId()).isEqualTo(lectureId);
+    }
+
+    @DisplayName("특정 사용자의 신청한 특강이 없는 경우 비어있는 리스트를 반환한다.")
+    @Test
+    void shouldReturnEmptyListForNoLectureRegistrations() {
+        // given
+        long userId = 1L;
+        given(lectureRegistrationRepo.findAllByUserId(userId)).willReturn(List.of());
+
+        // when
+        List<LectureRegistrationResult> result = sut.getRegisteredLecturesByUser(userId);
+
+        // then
+        assertThat(result).isEmpty();
+
+    }
+
+    @DisplayName("특정 사용자의 신청한 특강 목록을 신청일 기준 최신순으로 정렬하여 반환한다.")
+    @Test
+    void shouldGetLectureRegistrationsSuccessfully() {
+        // given
+        long userId = 1L;
+        User user = User.builder()
+                .username("test")
+                .build();
+        ReflectionTestUtils.setField(user, "id", userId);
+
+        Lecture lecture1 = createLecture();
+        Lecture lecture2 = createLecture();
+        Lecture lecture3 = createLecture();
+
+        LectureRegistration reg1 = LectureRegistration.builder()
+                .user(user)
+                .lecture(lecture1)
+                .registeredAt(LocalDateTime.of(2023, 1, 1, 12, 0))
+                .build();
+        ReflectionTestUtils.setField(reg1, "id", 100L);
+
+        LectureRegistration reg2 = LectureRegistration.builder()
+                .user(user)
+                .lecture(lecture2)
+                .registeredAt(LocalDateTime.of(2023, 1, 2, 12, 0))
+                .build();
+        ReflectionTestUtils.setField(reg2, "id", 200L);
+
+        LectureRegistration reg3 = LectureRegistration.builder()
+                .user(user)
+                .lecture(lecture3)
+                .registeredAt(LocalDateTime.of(2023, 1, 3, 12, 0))
+                .build();
+        ReflectionTestUtils.setField(reg3, "id", 300L);
+
+        given(lectureRegistrationRepo.findAllByUserId(userId)).willReturn(List.of(reg1, reg2, reg3));
+
+        // when
+        List<LectureRegistrationResult> results = sut.getRegisteredLecturesByUser(userId);
+
+        // then
+        assertThat(results).hasSize(3)
+                .extracting("registrationId")
+                .containsExactly(300L, 200L, 100L);
+    }
+
+    private Lecture createLecture() {
+        Lecture lecture = Lecture.builder()
+                .title("test")
+                .currentCapacity(10)
+                .maxCapacity(20)
+                .lectureDateTime(LocalDateTime.now())
+                .speakerName("test")
+                .registrationStartDateTime(LocalDateTime.now())
+                .registrationEndDateTime(LocalDateTime.now())
+                .build();
+        // id 필드에 값을 설정하기 위해 ReflectionTestUtils 사용
+        ReflectionTestUtils.setField(lecture, "id", 1L);
+        return lecture;
+
     }
 
 }

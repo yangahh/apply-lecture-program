@@ -11,9 +11,9 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -44,8 +44,8 @@ class LectureRegistrationRepoTest {
                 .registrationStartDateTime(LocalDateTime.now().minusDays(1))
                 .registrationEndDateTime(LocalDateTime.now().plusDays(1))
                 .build();
-        jpaUserRepo.save(existingUser);
-        jpaLectureRepo.save(existingLecture);
+        jpaUserRepo.saveAndFlush(existingUser);
+        jpaLectureRepo.saveAndFlush(existingLecture);
     }
 
     @AfterEach
@@ -107,5 +107,50 @@ class LectureRegistrationRepoTest {
         // then
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getRegisteredAt()).isNotNull();
+    }
+
+    @DisplayName("정상적으로 findAllByUserId 메소드를 호출하면 해당 userId로 등록된 LectureRegistration 리스트를 반환한다.")
+    @Test
+    void shouldFindAllByUserIdSuccessfully() {
+        // given
+        User user2 = User.builder().username("user2").build();
+        Lecture lecture2 = Lecture.builder()
+                .title("lecture1")
+                .speakerName("speaker1")
+                .maxCapacity(30)
+                .currentCapacity(0)
+                .lectureDateTime(LocalDateTime.now())
+                .registrationStartDateTime(LocalDateTime.now().minusDays(1))
+                .registrationEndDateTime(LocalDateTime.now().plusDays(1))
+                .build();
+        jpaUserRepo.saveAndFlush(user2);
+        jpaLectureRepo.saveAndFlush(lecture2);
+
+        LectureRegistration registration1 = LectureRegistration.builder()
+                .user(existingUser)
+                .lecture(existingLecture)
+                .build();
+
+        LectureRegistration registration2 = LectureRegistration.builder()
+                .user(user2)
+                .lecture(lecture2)
+                .build();
+
+        LectureRegistration registration3 = LectureRegistration.builder()
+                .user(existingUser)
+                .lecture(lecture2)
+                .build();
+
+        jpaLectureRegistrationRepo.save(registration1);
+        jpaLectureRegistrationRepo.save(registration2);
+        jpaLectureRegistrationRepo.save(registration3);
+        jpaLectureRegistrationRepo.flush();
+
+        // when
+        List<LectureRegistration> result = sut.findAllByUserId(existingUser.getId());
+
+        // then
+        assertThat(result).hasSize(2);
+
     }
 }

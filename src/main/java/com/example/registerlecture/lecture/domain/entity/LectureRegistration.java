@@ -44,9 +44,10 @@ public class LectureRegistration {
     private LocalDateTime registeredAt;
 
     @Builder
-    private LectureRegistration(User user, Lecture lecture) {
+    private LectureRegistration(User user, Lecture lecture, LocalDateTime registeredAt) {
         this.user = user;
         this.lecture = lecture;
+        this.registeredAt = registeredAt;
     }
 
     public static LectureRegistration createRegistration(User user, Lecture lecture) {

@@ -12,6 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class LectureRegistrationService {
@@ -24,7 +27,7 @@ public class LectureRegistrationService {
         validateLectureRegistration(user, lecture);
 
         LectureRegistration registration = lectureRegistrationRepo.save(user, lecture);
-        return LectureRegistrationResult.from(lecture, registration);
+        return LectureRegistrationResult.from(registration);
     }
 
     private void validateLectureRegistration(User user, Lecture lecture) {
@@ -35,6 +38,18 @@ public class LectureRegistrationService {
         if (lectureRegistrationRepo.existsByUserIdAndLectureId(user.getId(), lecture.getId())) {
             throw new AlreadyRegisteredException();
         }
+    }
+
+    @Transactional
+    public List<LectureRegistrationResult> getRegisteredLecturesByUser(long userId) {
+        List<LectureRegistration> registrations = sortByRegisteredAt(lectureRegistrationRepo.findAllByUserId(userId));
+        return registrations.stream().map(LectureRegistrationResult::from).toList();
+    }
+
+    private List<LectureRegistration> sortByRegisteredAt(List<LectureRegistration> registrations) {
+        return registrations.stream()
+                .sorted(Comparator.comparing(LectureRegistration::getRegisteredAt).reversed())
+                .toList();
     }
 
 }
