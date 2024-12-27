@@ -1,12 +1,14 @@
 package com.example.registerlecture.lecture.application.facade;
 
 import com.example.registerlecture.lecture.domain.dto.LectureRegistrationResult;
+import com.example.registerlecture.lecture.domain.dto.LectureResult;
 import com.example.registerlecture.lecture.domain.service.LectureRegistrationService;
 import com.example.registerlecture.user.domain.entity.User;
 import com.example.registerlecture.user.domain.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,5 +26,9 @@ public class LectureRegistrationFacade {
     public List<LectureRegistrationResult> getRegisteredLecturesByUser(long userId) {
         userService.getUser(userId);  // user 검증
         return lectureRegistrationService.getRegisteredLecturesByUser(userId);
+    }
+
+    public List<LectureResult> getLecturesAvailableForRegistration(Optional<LocalDate> date) {
+        return lectureRegistrationService.getLecturesAvailableForRegistration(date);
     }
 }

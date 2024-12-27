@@ -1,6 +1,7 @@
 package com.example.registerlecture.lecture.domain.service;
 
 import com.example.registerlecture.lecture.domain.dto.LectureRegistrationResult;
+import com.example.registerlecture.lecture.domain.dto.LectureResult;
 import com.example.registerlecture.lecture.domain.entity.Lecture;
 import com.example.registerlecture.lecture.domain.entity.LectureRegistration;
 import com.example.registerlecture.lecture.domain.exception.AlreadyRegisteredException;
@@ -12,8 +13,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +54,21 @@ public class LectureRegistrationService {
         return registrations.stream()
                 .sorted(Comparator.comparing(LectureRegistration::getRegisteredAt).reversed())
                 .toList();
+    }
+
+    @Transactional
+    public List<LectureResult> getLecturesAvailableForRegistration(Optional<LocalDate> date) {
+        date.ifPresent(this::validateDate);
+
+        return lectureRepo.findAvailableRegistration(date).stream()
+                .map(LectureResult::from)
+                .toList();
+    }
+
+    private void validateDate(LocalDate date) {
+        if (date.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("이미 지난 날짜로는 조회할 수 없습니다.");
+        }
     }
 
 }

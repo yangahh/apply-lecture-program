@@ -135,7 +135,6 @@
       "data": [
         {
           "lectureId": 1,
-          "userId": 1,
           "lectureTitle": "Spring Boot",
           "lectureDatetime": "2024-12-30 10:00:00",
           "registrationStartDatetime": "2024-12-25 00:00:00",
