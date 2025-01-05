@@ -11,7 +11,8 @@ spring:
     password: password
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
+    defer-datasource-initialization: true  # DataSource 초기화를 미루는 설정
     properties:
       hibernate:
         show_sql: true
@@ -19,3 +20,8 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         default_batch_fetch_size: 100
     open-in-view: false
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:sql/schema.sql
+#      data-locations: classpath:sql/data.sql
